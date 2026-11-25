@@ -2,11 +2,11 @@
 
 Build order for Yosif's List. Each phase ends with something the owner can see and approve before the next one starts.
 
-**Stack:** Next.js (TypeScript) + Tailwind · Supabase (Postgres + Auth) · Vercel hosting · Python scrapers on GitHub Actions. Free tiers only.
+**Stack:** Next.js (TypeScript) + Tailwind · Supabase (Postgres + Auth) · Netlify hosting · Python scrapers on GitHub Actions. Free tiers only.
 
 | # | Phase | Done when |
 |---|-------|-----------|
-| 0 | **Setup**: git, Next.js scaffold, public GitHub repo, Vercel deploy | A black page saying *Yosif's List* is live on a `*.vercel.app` URL |
+| 0 | **Setup**: git, Next.js scaffold, public GitHub repo, Netlify deploy | A black page saying *Yosif's List* is live on a `*.netlify.app` URL ✅ |
 | 1 | **List builder UI** (mock data): italic title, Enter adds an item with an animation, columns of 12, photo + name + ✕, `localStorage` autosave, optional `2x milk` quantities | The owner can build, remove and refresh a list on desktop and phone |
 | 2 | **Results receipts UI** (mock data): one receipt per store, sorted cheapest first, cheapest highlighted, "not found" rows, alternatives arrow, swipe on phones, disclaimer footer | The full list-to-results journey works with fake data |
 | 3 | **Database + search**: Supabase schema, `pg_trgm` fuzzy search, `/api/search`, seed data | "milk", "eggs" and "rice" return sensible matches from the DB |

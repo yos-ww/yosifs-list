@@ -7,7 +7,8 @@ A free website for **Doha, Qatar**. The user types a grocery list and sees which
 - Next.js 16 rules: `AGENTS.md`. **Read the bundled docs in `node_modules/next/dist/docs/` before using a Next.js API**, because they have changed from older versions.
 
 ## Current phase
-**Phase 0: Setup.** Done: git repo, docs, Next.js 16 scaffold, black home page, GitHub repo `yos-ww/yosifs-list`. Waiting on: Vercel deploy (owner connects the repo in Vercel).
+**Phase 1: List builder UI (mock data).** Built, waiting for the owner to review the look. Phase 0 is done: the GitHub repo `yos-ww/yosifs-list` auto-deploys to **Netlify** on each push to `main`.
+Sample products with real photos are in `lib/mockProducts.ts` (from Open Food Facts) until Phase 3 adds the database.
 _Update this line whenever a phase starts or finishes._
 
 ## Hard rules from the vision (don't break these)
@@ -20,7 +21,7 @@ _Update this line whenever a phase starts or finishes._
 - **Accounts:** username and password only, no email. The only tracking is `last_login`. Accounts inactive for 1 year are deleted.
 
 ## Stack
-Next.js (App Router, TypeScript) + Tailwind · Supabase (Postgres, Auth) · Vercel · Python scrapers on GitHub Actions.
+Next.js 16 (App Router, TypeScript) + Tailwind 4 · Supabase (Postgres, Auth) · **Netlify** hosting (the owner's existing account; Vercel is the fallback if Netlify has trouble with a Next.js version) · Python scrapers on GitHub Actions.
 
 ## How to work with the owner
 The owner is a **beginner**, so:
