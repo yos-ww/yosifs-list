@@ -4,9 +4,10 @@ A free website for **Doha, Qatar**. The user types a grocery list and sees which
 
 - Full vision: `docs/vision.md` (the original is the `.docx` in `docs/`)
 - Build order and phases: `docs/roadmap.md`
+- Next.js 16 rules: `AGENTS.md`. **Read the bundled docs in `node_modules/next/dist/docs/` before using a Next.js API**, because they have changed from older versions.
 
 ## Current phase
-**Phase 0: Setup.** Done: git repo, docs, this file. Waiting on: Node.js install, then the Next.js scaffold, the GitHub repo and the Vercel deploy.
+**Phase 0: Setup.** Done: git repo, docs, Next.js 16 scaffold, black home page, GitHub repo `yos-ww/yosifs-list`. Waiting on: Vercel deploy (owner connects the repo in Vercel).
 _Update this line whenever a phase starts or finishes._
 
 ## Hard rules from the vision (don't break these)
