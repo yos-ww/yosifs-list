@@ -1,0 +1,30 @@
+# Applies database changes (supabase/migrations/*.sql) to Supabase whenever they're pushed.
+# Needs the SUPABASE_DB_URL secret (Session pooler connection string, with the password filled in).
+# Every migration is written to be safe to run more than once.
+name: Update database
+
+on:
+  push:
+    branches: [main]
+    paths: ["supabase/migrations/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migrate
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Apply new migrations
+        run: supabase db push --db-url "$SUPABASE_DB_URL" --include-all
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
