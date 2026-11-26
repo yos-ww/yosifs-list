@@ -254,19 +254,24 @@ def cmd_scrape(args) -> None:
 
 # ── 3. upload ───────────────────────────────────────────────────────────────
 def supabase_request(path: str, rows: list, key: str, url: str, on_conflict: str) -> None:
+    headers = {
+        "apikey": key,
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates,return=minimal",
+    }
+    if key.startswith("eyJ"):  # legacy JWT-style keys also go in Authorization; new sb_secret_ keys don't
+        headers["Authorization"] = f"Bearer {key}"
     req = urllib.request.Request(
         f"{url}/rest/v1/{path}?on_conflict={on_conflict}",
         data=json.dumps(rows).encode(),
         method="POST",
-        headers={
-            "apikey": key,
-            "Authorization": f"Bearer {key}",
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates,return=minimal",
-        },
+        headers=headers,
     )
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        resp.read()
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            resp.read()
+    except urllib.error.HTTPError as e:
+        sys.exit(f"Supabase refused the upload to {path} (HTTP {e.code}): {e.read().decode('utf-8', 'replace')[:500]}")
 
 
 def cmd_upload(_args) -> None:
