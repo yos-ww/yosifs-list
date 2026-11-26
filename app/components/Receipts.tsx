@@ -168,7 +168,9 @@ export default function Receipts() {
       >
         <p className="text-sm font-semibold text-amber-200">⚠ Prices may be out of date</p>
         <p className="mt-1 text-sm text-amber-100/75">
-          Some items may not be in stock. Spot a mistake? Please report it.
+          Some items may not be in stock or have outdated prices. If anything looks wrong,{" "}
+          <span className="font-semibold text-amber-100">PLEASE</span> report it, even small things. Every
+          report makes the list more accurate for everyone.
         </p>
         <button
           type="button"
