@@ -28,6 +28,9 @@ grant execute on function public.word_patterns(text, boolean) to anon, authentic
 
 -- Up to `max_results` products for the dropdown. The same product name at several stores is
 -- grouped into one suggestion with its price range and how many stores have it.
+-- (Superseded by 20261126170000, which adds a "kind" column; dropped first so re-runs don't
+--  fail on the changed return type.)
+drop function if exists public.suggest_products(text, int);
 create or replace function public.suggest_products(q text, max_results int default 6)
 returns table (
   name        text,
