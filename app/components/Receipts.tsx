@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { withSize } from "@/lib/listItems";
 import { useHydrated, useListItems } from "@/lib/listStore";
@@ -17,6 +17,7 @@ import {
 } from "@/lib/results";
 import { rpc, select } from "@/lib/supabase";
 import ProductThumb from "./ProductThumb";
+import ReportDialog from "./ReportDialog";
 
 type Loaded = { key: string; stores: Store[]; matches: Match[] };
 
@@ -27,7 +28,8 @@ export default function Receipts() {
   const [choices, setChoices] = useState<Record<string, string>>({});
   /** Which item's alternatives menu is open, as `${storeId}:${itemId}`. */
   const [open, setOpen] = useState<string | null>(null);
-  const [fixNote, setFixNote] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const closeReport = useCallback(() => setReportOpen(false), []);
   const [data, setData] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -159,6 +161,27 @@ export default function Receipts() {
         </div>
       )}
 
+      {/* Big, hard-to-miss accuracy warning that asks people to report problems. */}
+      <div
+        role="note"
+        className="mb-8 w-full max-w-2xl rounded-2xl border border-amber-400/40 bg-amber-400/[0.07] px-5 py-4 text-left"
+      >
+        <p className="text-sm font-semibold text-amber-200">⚠ Please double-check before you shop</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-amber-100/75">
+          Prices come from online listings, so <span className="text-amber-100">some may be out of date</span>{" "}
+          and <span className="text-amber-100">some items may not be available</span> at your store. If anything
+          looks wrong, <span className="text-amber-100">please report it</span>, even small things. Every report
+          makes Yosif&apos;s List more accurate for everyone.
+        </p>
+        <button
+          type="button"
+          onClick={() => setReportOpen(true)}
+          className="mt-3 rounded-full bg-amber-300 px-5 py-2 text-sm font-medium text-neutral-950 transition-colors hover:bg-amber-200"
+        >
+          Report a problem
+        </button>
+      </div>
+
       {/* Phones: swipe between receipts. Desktop: side by side. */}
       <div className="no-scrollbar -mx-4 flex w-screen snap-x snap-mandatory gap-4 overflow-x-auto px-[7.5vw] pb-2 pt-4 sm:mx-0 sm:w-full sm:flex-wrap sm:items-start sm:justify-center sm:gap-6 sm:overflow-visible sm:px-0">
         {receipts.map((r) => (
@@ -184,15 +207,14 @@ export default function Receipts() {
         Prices may differ slightly in store. Spot something off?{" "}
         <button
           type="button"
-          onClick={() => setFixNote((v) => !v)}
+          onClick={() => setReportOpen(true)}
           className="text-neutral-300 underline underline-offset-4 hover:text-white"
         >
-          Tap to fix it.
+          Tap to report it.
         </button>
       </p>
-      {fixNote && (
-        <p className="mt-2 text-xs text-neutral-600">Price corrections are coming soon. Thanks for helping!</p>
-      )}    </div>
+
+      {reportOpen && <ReportDialog receipts={receipts} onClose={closeReport} />}    </div>
   );
 }
 

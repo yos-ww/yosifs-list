@@ -21,6 +21,16 @@ export async function select<T>(table: string, columns: string, signal?: AbortSi
   return check(res);
 }
 
+/** Add a row to a table the public may write to (e.g. "reports"). Nothing is read back. */
+export async function insert(table: string, row: object): Promise<void> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: "POST",
+    headers: { ...headers, Prefer: "return=minimal" },
+    body: JSON.stringify(row),
+  });
+  if (!res.ok) throw new Error(`Database error ${res.status}: ${await res.text()}`);
+}
+
 /** Call a database function, e.g. rpc("search_list", { queries: ["milk"] }). */
 export async function rpc<T>(fn: string, args: object, signal?: AbortSignal): Promise<T> {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
