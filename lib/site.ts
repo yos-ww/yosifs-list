@@ -2,5 +2,5 @@
 export const creator = {
   name: "Yosif",
   githubUrl: "https://github.com/yos-ww" as string | null,
-  linkedinUrl: null as string | null, // TODO: owner's LinkedIn profile URL
+  linkedinUrl: "https://www.linkedin.com/in/yosifwilliam/" as string | null,
 };
