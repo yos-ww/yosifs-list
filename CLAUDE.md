@@ -7,8 +7,9 @@ A free website for **Doha, Qatar**. The user types a grocery list and sees which
 - Next.js 16 rules: `AGENTS.md`. **Read the bundled docs in `node_modules/next/dist/docs/` before using a Next.js API**, because they have changed from older versions.
 
 ## Current phase
-**Phase 3 (database) is live, and Phase 4 (scrapers) has started.** The site reads real prices from Supabase. The Rafeeq scraper (`scrapers/rafeeq.py`, GitHub Action "Scrape prices", run by hand) has loaded a 30-per-chain sample for 7 chains.
-Open questions: the refresh plan for ~175k grocery products, and better matching for vague queries like "milk".
+**Phase 4: full Rafeeq scrape running** (started 2026-11-26: 16 slices of ~8k pages, staples first, ~3 days; GitHub Action "Scrape prices", mode=full). The owner verified prices (17/19 exact vs store sites; see `docs/price-check.md`). Chains: Al Meera, Carrefour, Lulu, Spar, Monoprix.
+The nightly refresh schedule is **commented out** in `scrape.yml`; turn it on only with the owner's OK once the full run is done.
+Next (owner's plan): "Fix this price" / "Not in store?" buttons (Phase 6), then a soft launch to 20–50 people. Store/app outreach happens after launch, once there are numbers.
 - **Database changes:** add or edit SQL in `supabase/migrations/` and push. The "Update database" Action re-runs **every** file in order with psql, so every migration must be safe to re-run (`if not exists`, `create or replace`, `drop policy if exists`). Never ask the owner to paste SQL.
 - **Secrets (GitHub Actions):** `SUPABASE_SECRET_KEY` (scraper writes), `SUPABASE_DB_URL` (migrations). The publishable key and URL are public and live in `lib/supabase.ts`.
 - The browser talks to Supabase directly (`lib/supabase.ts`). Search is the `search_list(queries[], per_store)` database function; `lib/results.ts` builds the receipts. Live site: **https://yosifs-list.vercel.app/**. Vercel auto-deploys every push to `main` of `yos-ww/yosifs-list`.
