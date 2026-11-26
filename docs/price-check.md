@@ -1,5 +1,43 @@
 # Price check: is Rafeeq accurate?
 
+## Round 2: every chain (Rafeeq prices from 26 Nov 2026)
+
+Check each on **Talabat** (that chain's page) and the **chain's own website/app** if it has one.
+
+| Chain | Product | Rafeeq | Talabat | Store site |
+|---|---|---:|---:|---:|
+| **Al Meera** | Nescafé Classic 47.5g | 9.75 | | |
+| | Kikkoman Soy Sauce 250ml | 15.50 | | |
+| | Red Bull 250ml | 10.00 | | |
+| | Heinz French Dressing 400ml | 23.50 | | |
+| | Lotus Jasmine Rice 5kg | 27.00 | | |
+| **Carrefour** | Kikkoman Soy Sauce 250ml | 15.50 | | |
+| | Red Bull 250ml | 10.00 | | |
+| | Tabasco Pepper Sauce 150ml | 18.50 | | |
+| | Heinz French Dressing 400ml | 15.00 | | |
+| | SIS Brown Sugar 1kg | 14.25 | | |
+| **Lulu** | Lotus Jasmine Rice 5kg | 24.75 | | |
+| | SIS Brown Sugar 1kg | 12.00 | | |
+| | QFM Flour No.1 2kg | 8.50 | | |
+| | Al Kabeer French Fries 1kg | 7.50 | | |
+| | Al Alali Tomato Paste 220g | 3.50 | | |
+| **Spar** | Nescafé Classic 47.5g | 11.00 | | |
+| | Abu Bint Calrose Rice 5kg | 34.75 | | |
+| | QFM Flour No.1 2kg | 10.00 | | |
+| | Al Kabeer French Fries 1kg | 8.50 | | |
+| | Ola Sunflower Oil 900ml | 10.00 | | |
+| **Monoprix** | Kikkoman Soy Sauce 250ml | 13.00 | | |
+| | Red Bull 250ml | 10.00 | | |
+| | Heinz French Dressing 400ml | 24.00 | | |
+| | Lotus Jasmine Rice 5kg | 24.00 | | |
+| | SIS Brown Sugar 1kg | 13.25 | | |
+
+Note: Heinz French Dressing is 15.00 at Carrefour but 23.50–24.00 elsewhere on Rafeeq. Worth checking whether that's a real promotion or a data error.
+
+---
+
+## Round 1: Carrefour only
+
 Rafeeq prices collected **26 Nov 2026**. Compare each one with **Talabat**, the **store's own app or website**, or the **shelf price in store**, then fill in the blanks (or just send the numbers to Claude).
 
 **What we're deciding:** if Rafeeq is within about ±5% (or the same) for most items, we go ahead with the full scrape. If it's consistently higher, we look at other sources.
