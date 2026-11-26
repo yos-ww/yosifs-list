@@ -9,8 +9,9 @@
 name: Scrape prices
 
 on:
-  schedule:
-    - cron: "0 21 * * *" # every night at 00:00 Doha time
+  # Nightly schedule is OFF until the owner has checked Rafeeq prices against Talabat / in-store.
+  # schedule:
+  #   - cron: "0 21 * * *" # every night at 00:00 Doha time
   workflow_dispatch:
     inputs:
       mode:
