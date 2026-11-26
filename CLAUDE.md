@@ -18,6 +18,7 @@ _Update this line whenever a phase starts or finishes._
 - **Scope:** Doha only, English only (Arabic later). Stores: Carrefour, Lulu, Al Meera first.
 - **Searches never scrape live.** They read saved prices from the database.
 - **Scrapers are plain scripts, never AI.** One small scraper per store, gentle request rates, run on a schedule by GitHub Actions.
+- **Scraping boundaries (owner's decision; see `docs/scraping-notes.md`):** public pages only, no logins, respect robots.txt paths, at least 1 s between requests, and **never get around a block** (Cloudflare/Akamai challenges, CAPTCHAs, 403s). If a source asks us to stop, stop and remove its data.
 - **No AI features in v1.** AI matching and smarter search are "later, if needed".
 - **Accounts:** username and password only, no email. The only tracking is `last_login`. Accounts inactive for 1 year are deleted.
 
