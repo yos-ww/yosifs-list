@@ -54,6 +54,11 @@ export function setListItems(next: ListItem[]) {
   listeners.forEach((l) => l());
 }
 
+/** Change one item using the latest saved list (safe to call after an async lookup). */
+export function updateListItem(id: string, patch: Partial<ListItem>) {
+  setListItems(read().map((i) => (i.id === id ? { ...i, ...patch } : i)));
+}
+
 export function useListItems(): ListItem[] {
   return useSyncExternalStore(subscribe, read, () => EMPTY);
 }

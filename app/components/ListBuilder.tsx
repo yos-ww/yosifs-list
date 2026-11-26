@@ -2,8 +2,8 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { findProduct, newId, parseEntry, type ListItem } from "@/lib/listItems";
-import { setListItems, useListItems } from "@/lib/listStore";
+import { lookupProduct, newId, parseEntry, type ListItem } from "@/lib/listItems";
+import { setListItems, updateListItem, useListItems } from "@/lib/listStore";
 import ProductThumb from "./ProductThumb";
 
 /** After this many items, a new column starts to the right (desktop). */
@@ -36,8 +36,12 @@ export default function ListBuilder() {
       );
       return;
     }
-    const item: ListItem = { id: newId(), query, qty, product: findProduct(query) };
+    // Show the item right away; its photo and product name fill in once the database answers.
+    const item: ListItem = { id: newId(), query, qty, product: null };
     setListItems([...items, item]);
+    lookupProduct(query)
+      .then((product) => product && updateListItem(item.id, { product }))
+      .catch(() => {}); // offline or no match: the item just keeps its plain square
   }
 
   function removeItem(id: string) {

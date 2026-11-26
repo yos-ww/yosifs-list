@@ -3,9 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useHydrated, useListItems } from "@/lib/listStore";
-import { mockReceipts } from "@/lib/mockStores";
-import { formatQar, sortReceipts, type Receipt, type ReceiptLine } from "@/lib/results";
+import {
+  buildReceipts,
+  formatQar,
+  sortReceipts,
+  type Match,
+  type Receipt,
+  type ReceiptLine,
+  type Store,
+} from "@/lib/results";
+import { rpc, select } from "@/lib/supabase";
 import ProductThumb from "./ProductThumb";
+
+type Loaded = { key: string; stores: Store[]; matches: Match[] };
 
 export default function Receipts() {
   const items = useListItems();
@@ -15,8 +25,36 @@ export default function Receipts() {
   /** Which item's alternatives menu is open, as `${storeId}:${itemId}`. */
   const [open, setOpen] = useState<string | null>(null);
   const [fixNote, setFixNote] = useState(false);
+  const [data, setData] = useState<Loaded | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
-  const receipts = useMemo(() => sortReceipts(mockReceipts(items, choices)), [items, choices]);
+  // Only search again when what was typed changes (not when a quantity changes).
+  const queriesKey = JSON.stringify(items.map((i) => i.query));
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const queries = JSON.parse(queriesKey) as string[];
+    if (queries.length === 0) return;
+    const ctrl = new AbortController();
+    Promise.all([
+      select<Store>("stores", "id,name", ctrl.signal),
+      rpc<Match[]>("search_list", { queries, per_store: 4 }, ctrl.signal),
+    ])
+      .then(([stores, matches]) => setData({ key: queriesKey, stores, matches }))
+      .catch(() => {
+        if (!ctrl.signal.aborted) setFailed(queriesKey);
+      });
+    return () => ctrl.abort();
+  }, [hydrated, queriesKey, attempt]);
+
+  const receipts = useMemo(() => {
+    if (!data || data.key !== queriesKey) return null;
+    // Leave out stores that matched nothing on this list.
+    const withMatches = new Set(data.matches.map((m) => m.store_id));
+    const stores = data.stores.filter((s) => withMatches.has(s.id));
+    return sortReceipts(buildReceipts(items, stores, data.matches, choices));
+  }, [data, queriesKey, items, choices]);
 
   // Close the alternatives menu on Escape or a click outside it.
   useEffect(() => {
@@ -41,6 +79,38 @@ export default function Receipts() {
         <p className="text-sm text-neutral-500">Your list is empty.</p>
         <Link href="/" className="mt-4 inline-block text-sm text-neutral-300 underline-offset-4 hover:underline">
           ← Add some items
+        </Link>
+      </div>
+    );
+  }
+
+  if (!receipts) {
+    if (failed === queriesKey) {
+      return (
+        <div className="mt-6 text-center">
+          <p className="text-sm text-neutral-500">Couldn&apos;t load prices right now.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setFailed(null);
+              setAttempt((a) => a + 1);
+            }}
+            className="mt-4 text-sm text-neutral-300 underline-offset-4 hover:underline"
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return <p className="mt-6 animate-pulse text-sm text-neutral-500">Comparing prices…</p>;
+  }
+
+  if (receipts.length === 0) {
+    return (
+      <div className="mt-6 text-center">
+        <p className="text-sm text-neutral-500">No stores matched anything on your list yet.</p>
+        <Link href="/" className="mt-4 inline-block text-sm text-neutral-300 underline-offset-4 hover:underline">
+          ← Try different words
         </Link>
       </div>
     );
@@ -98,6 +168,7 @@ export default function Receipts() {
       {fixNote && (
         <p className="mt-2 text-xs text-neutral-600">Price corrections are coming soon. Thanks for helping!</p>
       )}
+      <p className="mt-2 text-[11px] text-neutral-700">Prices collected from the Rafeeq delivery app.</p>
     </div>
   );
 }

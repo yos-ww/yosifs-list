@@ -1,4 +1,5 @@
-import { mockProducts, type MockProduct } from "./mockProducts";
+import { rpc } from "./supabase";
+import type { Match } from "./results";
 
 /** One line on the user's grocery list. */
 export type ListItem = {
@@ -6,8 +7,8 @@ export type ListItem = {
   /** What the user typed, minus any quantity (e.g. "milk"). */
   query: string;
   qty: number;
-  /** The product we show a photo and name for, or null if nothing matched. */
-  product: Pick<MockProduct, "id" | "name" | "size" | "image"> | null;
+  /** The product we show a photo and name for, or null if nothing matched (yet). */
+  product: { id: string; name: string; size: string; image: string } | null;
 };
 
 const MAX_QTY = 99;
@@ -30,44 +31,14 @@ export function parseEntry(raw: string): { query: string; qty: number } {
   return { query: query.trim(), qty };
 }
 
-function words(s: string): string[] {
-  return s
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean)
-    .map((w) => (w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w)); // crude plural → singular
-}
-
-/**
- * Rank products by how well they match a query (stand-in for real search in Phase 3).
- * Scores each product by how many query words appear in its name or category.
- * Returns only products that match at all, best first.
- */
-export function rankProducts<T extends Pick<MockProduct, "name" | "category">>(
-  query: string,
-  products: T[],
-): T[] {
-  const q = words(query);
-  if (q.length === 0) return [];
-  const scored: { p: T; score: number }[] = [];
-  for (const p of products) {
-    const name = new Set(words(p.name));
-    const cat = new Set(words(p.category));
-    let score = 0;
-    for (const w of q) {
-      if (name.has(w)) score += 1;
-      if (cat.has(w)) score += 0.75; // "milk" ranks real milks above "Milk Bread"
-    }
-    if (score > 0) scored.push({ p, score });
-  }
-  return scored.sort((a, b) => b.score - a.score).map((s) => s.p); // stable: ties keep catalogue order
-}
-
-/** Best sample product for a query, for the photo + name on the list. */
-export function findProduct(query: string): ListItem["product"] {
-  const best = rankProducts(query, mockProducts)[0];
+/** Best product in the database for a query, for the photo + name on the list. */
+export async function lookupProduct(query: string): Promise<ListItem["product"]> {
+  const matches = await rpc<Match[]>("search_list", { queries: [query], per_store: 1 });
+  const best = matches
+    .filter((m) => m.image_url)
+    .sort((a, b) => b.score - a.score)[0];
   if (!best) return null;
-  return { id: best.id, name: best.name, size: best.size, image: best.image };
+  return { id: String(best.product_id), name: best.name, size: best.size ?? "", image: best.image_url ?? "" };
 }
 
 export function newId(): string {
