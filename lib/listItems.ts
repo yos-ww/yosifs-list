@@ -31,6 +31,26 @@ export function parseEntry(raw: string): { query: string; qty: number } {
   return { query: query.trim(), qty };
 }
 
+/** One row of the search-as-you-type dropdown (the same product across stores, grouped). */
+export type Suggestion = {
+  name: string;
+  size: string | null;
+  image_url: string | null;
+  min_price: number | string;
+  max_price: number | string;
+  store_count: number;
+};
+
+export function suggestProducts(q: string, signal?: AbortSignal): Promise<Suggestion[]> {
+  return rpc<Suggestion[]>("suggest_products", { q, max_results: 6 }, signal);
+}
+
+/** "Abu Kass Rice 5kg" + "5kg" → "Abu Kass Rice 5kg" (don't repeat a size that's already in the name). */
+export function withSize(name: string, size?: string | null): string {
+  if (!size || name.toLowerCase().includes(size.toLowerCase())) return name;
+  return `${name} ${size}`;
+}
+
 /** Best product in the database for a query, for the photo + name on the list. */
 export async function lookupProduct(query: string): Promise<ListItem["product"]> {
   const matches = await rpc<Match[]>("search_list", { queries: [query], per_store: 1 });

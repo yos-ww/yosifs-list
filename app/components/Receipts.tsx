@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { withSize } from "@/lib/listItems";
 import { useHydrated, useListItems } from "@/lib/listStore";
 import {
   buildReceipts,
@@ -273,9 +274,7 @@ function Line({
   onChoose: (itemId: string, productId: string) => void;
 }) {
   const isOpen = open === menuKey;
-  const label = line.product
-    ? `${line.product.name}${line.product.size ? ` ${line.product.size}` : ""}`
-    : line.query;
+  const label = line.product ? withSize(line.product.name, line.product.size) : line.query;
 
   return (
     <li data-alt-root className="group relative">
@@ -330,8 +329,7 @@ function Line({
             >
               <ProductThumb src={alt.image} className="size-7" />
               <span className="min-w-0 flex-1 truncate text-neutral-300">
-                {alt.name}
-                {alt.size && <span className="ml-1 text-neutral-500">{alt.size}</span>}
+                {withSize(alt.name, alt.size)}
               </span>
               <span className="shrink-0 font-mono tabular-nums text-neutral-400">{formatQar(alt.price)}</span>
             </button>
