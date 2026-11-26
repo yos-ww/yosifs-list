@@ -42,7 +42,10 @@ export default function ListBuilder() {
   /** Highlighted suggestion for arrow keys (-1 = none). */
   const [active, setActive] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const router = useRouter();
+
+  useEffect(() => () => clearTimeout(blurTimer.current), []);
 
   const typed = parseEntry(text).query;
 
@@ -65,6 +68,7 @@ export default function ListBuilder() {
 
   /** Add to the list (or bump the quantity if it's already there). */
   function addToList(query: string, qty: number, product: ListItem["product"], kind?: string) {
+    clearTimeout(blurTimer.current);
     setText("");
     setMenuOpen(false);
     setActive(-1);
@@ -155,8 +159,15 @@ export default function ListBuilder() {
               setActive(-1);
             }}
             onKeyDown={onKeyDown}
-            onFocus={() => setMenuOpen(true)}
-            onBlur={() => setMenuOpen(false)}
+            onFocus={() => {
+              clearTimeout(blurTimer.current);
+              setMenuOpen(true);
+            }}
+            // On phones, tapping a suggestion blurs the input BEFORE the tap registers.
+            // Closing a moment later lets the tap land on the suggestion first.
+            onBlur={() => {
+              blurTimer.current = setTimeout(() => setMenuOpen(false), 250);
+            }}
             placeholder="Add an item — e.g. milk, 2x rice"
             aria-label="Add an item to your list"
             role="combobox"
