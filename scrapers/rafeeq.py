@@ -132,6 +132,11 @@ def chain_for_slug(store_slug: str) -> str | None:
     return None
 
 
+def product_name_slug(url: str) -> str:
+    """'…/abu-bint-calrose-rice-5kg-12345' → 'abu-bint-calrose-rice-5kg' (same across chains)."""
+    return re.sub(r"-\d+$", "", url.rstrip("/").rsplit("/", 1)[-1])
+
+
 def humanize(slug: str) -> str:
     return re.sub(r"-\d+$", "", slug).replace("-", " ").strip()
 
@@ -221,15 +226,29 @@ def cmd_scrape(args) -> None:
     now = datetime.now(timezone.utc).isoformat()
     deadline = time.monotonic() + args.max_minutes * 60 if args.max_minutes else None
 
+    # --common N: only products whose name appears at N+ chains (good for testing comparisons).
+    biggest = {c: max(index[c].items(), key=lambda kv: len(kv[1])) for c in chains if index.get(c)}
+    common_names: set[str] = set()
+    if args.common:
+        seen_at: dict[str, set] = defaultdict(set)
+        for chain, (_slug, products) in biggest.items():
+            for info in products.values():
+                if info["category"].split(" / ")[0] not in NON_GROCERY:
+                    seen_at[product_name_slug(info["url"])].add(chain)
+        common_names = {name for name, at in seen_at.items() if len(at) >= args.common}
+        print(f"{len(common_names)} grocery products listed at {args.common}+ chains", file=sys.stderr)
+
     # Build each chain's to-do list, then visit them round-robin so a time limit cuts all chains evenly.
     queues = []
     for chain in chains:
-        branches = index.get(chain)
-        if not branches:
+        if chain not in biggest:
             print(f"{chain}: not in index, skipping", file=sys.stderr)
             continue
-        slug, products = max(branches.items(), key=lambda kv: len(kv[1]))
-        items = pick_items(products, args)
+        slug, products = biggest[chain]
+        if args.common:
+            items = [(sku, info) for sku, info in products.items() if product_name_slug(info["url"]) in common_names]
+        else:
+            items = pick_items(products, args)
         print(f"{chain}: {len(items)} products from {slug}", file=sys.stderr)
         queues.append([(chain, sku, info) for sku, info in items])
     todo = [q[i] for i in range(max((len(q) for q in queues), default=0)) for q in queues if i < len(q)]
@@ -341,6 +360,7 @@ def main() -> None:
     s.add_argument("--append", action="store_true", help="add to the existing output file instead of replacing it")
     s.add_argument("--slice", default="", help="K/N: only the K-th of N slices (staples are in the first slices)")
     s.add_argument("--max-minutes", type=float, default=0, help="stop visiting pages after this long (0 = no limit)")
+    s.add_argument("--common", type=int, default=0, help="only products listed (same name) at this many chains or more")
     sub.add_parser("upload")
     args = ap.parse_args()
     try:

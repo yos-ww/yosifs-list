@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "sample, daily (one slice) or full (all 16 slices, ~3 days)"
+        description: "sample, common (products sold at 4+ chains), daily (one slice) or full (all 16 slices, ~3 days)"
         default: "sample"
       limit:
         description: "Products per chain in sample mode"
@@ -55,6 +55,7 @@ jobs:
         run: |
           case "$MODE" in
             sample) slices='["sample"]' ;;
+            common) slices='["common"]' ;;
             full)   slices=$(python3 -c "import json; print(json.dumps([f'{k}/$SLICES' for k in range($SLICES)]))") ;;
             *)      k=$(( 10#$(date -u +%j) % SLICES )); slices="[\"$k/$SLICES\"]" ;;
           esac
@@ -87,6 +88,8 @@ jobs:
         run: |
           if [ "$SLICE" = "sample" ]; then
             python scrapers/rafeeq.py scrape --limit "$LIMIT"
+          elif [ "$SLICE" = "common" ]; then
+            python scrapers/rafeeq.py scrape --common 4
           else
             python scrapers/rafeeq.py scrape --slice "$SLICE" --max-minutes 320
           fi
