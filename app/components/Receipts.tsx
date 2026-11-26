@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useHydrated, useListItems } from "@/lib/listStore";
 import {
   buildReceipts,
+  cheapestComplete,
+  cheapestPerItem,
   formatQar,
   sortReceipts,
   type Match,
@@ -116,32 +118,52 @@ export default function Receipts() {
     );
   }
 
-  const [cheapest, ...rest] = receipts;
-  const priciest = rest.at(-1);
+  const multi = receipts.length > 1;
+  // Only a store that found EVERY item can be "cheapest"; totals with gaps aren't comparable.
+  const winner = cheapestComplete(receipts);
+  const priciestComplete = receipts
+    .filter((r) => r.missing === 0 && r !== winner)
+    .reduce<Receipt | null>((m, r) => (!m || r.total > m.total ? r : m), null);
+  const bestPerItem = cheapestPerItem(receipts);
+  const isBest = (line: ReceiptLine) => {
+    const b = bestPerItem.get(line.itemId);
+    return multi && !!b && b.count > 1 && line.lineTotal === b.min;
+  };
 
   return (
     <div className="flex w-full flex-col items-center">
-      {priciest && (
-        <p className="mb-8 max-w-xl text-center text-sm text-neutral-400">
-          <span className="text-neutral-100">{cheapest.storeName}</span> is cheapest at{" "}
-          <span className="font-mono text-neutral-100">QAR {formatQar(cheapest.total)}</span>
-          {priciest.total > cheapest.total && cheapest.missing <= priciest.missing && (
-            <>
-              {" "}
-              — QAR {formatQar(priciest.total - cheapest.total)} less than {priciest.storeName}
-            </>
+      {multi && (
+        <div className="mb-8 max-w-xl text-center text-sm text-neutral-400">
+          {winner ? (
+            <p>
+              <span className="text-neutral-100">{winner.storeName}</span> is cheapest at{" "}
+              <span className="font-mono text-neutral-100">QAR {formatQar(winner.total)}</span>
+              {priciestComplete && priciestComplete.total > winner.total && (
+                <>
+                  {" "}
+                  — QAR {formatQar(priciestComplete.total - winner.total)} less than{" "}
+                  {priciestComplete.storeName}
+                </>
+              )}
+              .
+            </p>
+          ) : (
+            <p>No store has everything on your list yet, so the totals cover different items.</p>
           )}
-          .
-        </p>
+          <p className="mt-1.5 text-xs text-neutral-600">
+            <span className="text-neutral-300">•</span> marks the cheapest price for each item.
+          </p>
+        </div>
       )}
 
       {/* Phones: swipe between receipts. Desktop: side by side. */}
       <div className="no-scrollbar -mx-4 flex w-screen snap-x snap-mandatory gap-4 overflow-x-auto px-[7.5vw] pb-2 pt-4 sm:mx-0 sm:w-full sm:flex-wrap sm:items-start sm:justify-center sm:gap-6 sm:overflow-visible sm:px-0">
-        {receipts.map((r, i) => (
+        {receipts.map((r) => (
           <ReceiptCard
             key={r.storeId}
             receipt={r}
-            isCheapest={i === 0 && receipts.length > 1}
+            isCheapest={r === winner}
+            isBest={isBest}
             open={open}
             onToggle={(key) => setOpen((cur) => (cur === key ? null : key))}
             onChoose={(itemId, productId) => {
@@ -176,12 +198,14 @@ export default function Receipts() {
 function ReceiptCard({
   receipt,
   isCheapest,
+  isBest,
   open,
   onToggle,
   onChoose,
 }: {
   receipt: Receipt;
   isCheapest: boolean;
+  isBest: (line: ReceiptLine) => boolean;
   open: string | null;
   onToggle: (key: string) => void;
   onChoose: (itemId: string, productId: string) => void;
@@ -210,6 +234,7 @@ function ReceiptCard({
           <Line
             key={line.itemId}
             line={line}
+            best={isBest(line)}
             menuKey={`${receipt.storeId}:${line.itemId}`}
             open={open}
             onToggle={onToggle}
@@ -234,12 +259,14 @@ function ReceiptCard({
 
 function Line({
   line,
+  best,
   menuKey,
   open,
   onToggle,
   onChoose,
 }: {
   line: ReceiptLine;
+  best: boolean;
   menuKey: string;
   open: string | null;
   onToggle: (key: string) => void;
@@ -275,9 +302,15 @@ function Line({
         )}
         <span
           className={`shrink-0 text-right font-mono tabular-nums ${
-            line.product ? "text-neutral-200" : "text-[11px] text-neutral-600"
+            !line.product
+              ? "text-[11px] text-neutral-600"
+              : best
+                ? "font-semibold text-white"
+                : "text-neutral-400"
           }`}
+          title={best ? "Cheapest price for this item" : undefined}
         >
+          {best && <span className="mr-1 text-neutral-300">•</span>}
           {line.lineTotal !== null ? formatQar(line.lineTotal) : "not found"}
         </span>
       </div>

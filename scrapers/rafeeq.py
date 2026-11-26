@@ -48,10 +48,10 @@ CHAINS = {
     "lulu": ("Lulu", "lulu-hypermarket"),
     "spar": ("Spar", "spar"),
     "monoprix": ("Monoprix", "monoprix"),
-    "ansar": ("Ansar Gallery", "ansar-gallery"),
-    "cityhyper": ("City Hypermarket", "city-hypermarket"),
+    # Not on Rafeeq (checked 2026-11-26), kept so they're picked up if they join:
     "safari": ("Safari", "safari"),
     "familyfood": ("Family Food Centre", "family-food-centre"),
+    # Owner chose not to include Ansar Gallery and City Hypermarket for now.
 }
 
 # Top-level Rafeeq categories we skip: not groceries (home goods, beauty, toys, electronics…).
@@ -60,6 +60,20 @@ NON_GROCERY = {
     "electronics", "beauty women s care", "hair care", "hygiene personal care", "kitchen utensils",
     "pharmacy", "men care", "games toys", "body care", "flowers and gifts", "pet care", "disposables",
 }
+
+# Everyday staples get scraped first, in this order (matched against the aisle name).
+STAPLES = [
+    "milk", "laban", "egg", "bread", "bakery", "rice", "dairy", "yogurt", "cheese", "butter",
+    "fruit", "vegetable", "chicken", "poultry", "meat", "fish", "seafood", "oil", "ghee",
+    "sugar", "flour", "water", "juice", "tea", "coffee", "pasta", "noodle", "canned", "tomato",
+    "cereal", "breakfast", "honey", "date",
+]
+
+
+def staple_rank(category: str) -> int:
+    c = category.lower()
+    return next((i for i, word in enumerate(STAPLES) if word in c), len(STAPLES))
+
 
 PRODUCT_URL_RE = re.compile(
     r"<loc>(https://www\.gorafeeq\.com/en/home/grocery/([a-z0-9-]+)/([a-z0-9-]+)/([a-z0-9-]+)/([a-z0-9-]+?)-(\d+))</loc>"
@@ -173,83 +187,110 @@ def parse_product(html: str) -> dict | None:
     return None
 
 
+def pick_items(products: dict, args) -> list:
+    """Which of a chain's products to visit this run."""
+    groceries = [
+        (sku, info) for sku, info in products.items()
+        if info["category"].split(" / ")[0] not in NON_GROCERY
+    ]
+    if args.limit:
+        # Spread a small sample across aisles instead of taking 30 cheeses.
+        by_aisle: dict[str, list] = defaultdict(list)
+        for sku, info in groceries:
+            by_aisle[info["category"]].append((sku, info))
+        aisles = list(by_aisle.values())
+        items: list = []
+        while len(items) < args.limit and any(aisles):
+            for aisle in aisles:
+                if aisle and len(items) < args.limit:
+                    items.append(aisle.pop(0))
+        return items
+    # Staples first, then everything else; stable order so slices stay roughly the same week to week.
+    groceries.sort(key=lambda si: (staple_rank(si[1]["category"]), si[0]))
+    if args.slice:
+        k, n = (int(x) for x in args.slice.split("/"))
+        groceries = groceries[k * len(groceries) // n : (k + 1) * len(groceries) // n]
+    return groceries
+
+
 def cmd_scrape(args) -> None:
     if not INDEX_FILE.exists():
         sys.exit("Run `index` first.")
     index = json.loads(INDEX_FILE.read_text())
-    chains = args.chains.split(",") if args.chains else list(index)
+    chains = [c for c in (args.chains.split(",") if args.chains else list(index)) if c in CHAINS]
     now = datetime.now(timezone.utc).isoformat()
+    deadline = time.monotonic() + args.max_minutes * 60 if args.max_minutes else None
+
+    # Build each chain's to-do list, then visit them round-robin so a time limit cuts all chains evenly.
+    queues = []
+    for chain in chains:
+        branches = index.get(chain)
+        if not branches:
+            print(f"{chain}: not in index, skipping", file=sys.stderr)
+            continue
+        slug, products = max(branches.items(), key=lambda kv: len(kv[1]))
+        items = pick_items(products, args)
+        print(f"{chain}: {len(items)} products from {slug}", file=sys.stderr)
+        queues.append([(chain, sku, info) for sku, info in items])
+    todo = [q[i] for i in range(max((len(q) for q in queues), default=0)) for q in queues if i < len(q)]
+    print(f"{len(todo)} product pages to visit", file=sys.stderr)
 
     DATA_DIR.mkdir(exist_ok=True)
     ok = skipped = 0
     with PRODUCTS_FILE.open("a" if args.append else "w") as out:
-        for chain in chains:
-            branches = index.get(chain)
-            if not branches:
-                print(f"{chain}: not in index, skipping", file=sys.stderr)
+        for n, (chain, sku, info) in enumerate(todo, 1):
+            if deadline and time.monotonic() > deadline:
+                print(f"Time limit reached after {n - 1} pages; saving what we have.", file=sys.stderr)
+                break
+            if n % 250 == 0:
+                print(f"  {n}/{len(todo)} ({ok} saved)", file=sys.stderr)
+            time.sleep(DELAY_SECONDS)
+            row = scrape_product(chain, sku, info, now)
+            if row is None:
+                skipped += 1
                 continue
-            slug, products = max(branches.items(), key=lambda kv: len(kv[1]))
-            groceries = [
-                (sku, info) for sku, info in products.items()
-                if info["category"].split(" / ")[0] not in NON_GROCERY
-            ]
-            if args.limit:
-                # Spread a small sample across aisles instead of taking 30 cheeses.
-                by_aisle: dict[str, list] = defaultdict(list)
-                for sku, info in groceries:
-                    by_aisle[info["category"]].append((sku, info))
-                aisles = list(by_aisle.values())
-                items = []
-                while len(items) < args.limit and any(aisles):
-                    for aisle in aisles:
-                        if aisle and len(items) < args.limit:
-                            items.append(aisle.pop(0))
-            else:
-                items = groceries
-            print(f"{chain}: {len(items)} products from {slug}", file=sys.stderr)
-            for n, (sku, info) in enumerate(items, 1):
-                time.sleep(DELAY_SECONDS)
-                try:
-                    html = fetch(info["url"]).decode("utf-8", "replace")
-                except urllib.error.HTTPError:
-                    skipped += 1
-                    continue
-                p = parse_product(html)
-                offer = (p or {}).get("offers") or {}
-                if isinstance(offer, list):
-                    offer = offer[0] if offer else {}
-                try:
-                    price = float(offer.get("price"))
-                except (TypeError, ValueError):
-                    skipped += 1
-                    continue
-                if offer.get("priceCurrency", "QAR") != "QAR" or price <= 0:
-                    skipped += 1
-                    continue
-                name = " ".join(str(p.get("name", "")).split())
-                image = p.get("image")
-                if isinstance(image, list):
-                    image = image[0] if image else None
-                size = SIZE_RE.search(name)
-                row = {
-                    "store_id": chain,
-                    "source": "rafeeq",
-                    "source_sku": sku,
-                    "name": name,
-                    "size": size.group(1) if size else None,
-                    "category": info["category"],
-                    "price_qar": round(price, 2),
-                    "in_stock": "InStock" in str(offer.get("availability", "InStock")),
-                    "image_url": image,
-                    "source_url": info["url"],
-                    "scraped_at": now,
-                }
-                out.write(json.dumps(row, ensure_ascii=False) + "\n")
-                out.flush()  # keep what we have if the run stops early
-                ok += 1
-                if n % 25 == 0:
-                    print(f"  {chain}: {n}/{len(items)}", file=sys.stderr)
+            out.write(json.dumps(row, ensure_ascii=False) + "\n")
+            out.flush()  # keep what we have if the run stops early
+            ok += 1
     print(f"Saved {ok} products ({skipped} skipped) to {PRODUCTS_FILE}", file=sys.stderr)
+
+
+def scrape_product(chain: str, sku: str, info: dict, now: str) -> dict | None:
+    """Visit one product page and turn its JSON-LD into a database row (None if unusable)."""
+    try:
+        html = fetch(info["url"]).decode("utf-8", "replace")
+    except urllib.error.HTTPError:
+        return None
+    p = parse_product(html)
+    if not p:
+        return None
+    offer = p.get("offers") or {}
+    if isinstance(offer, list):
+        offer = offer[0] if offer else {}
+    try:
+        price = float(offer.get("price"))
+    except (TypeError, ValueError):
+        return None
+    if offer.get("priceCurrency", "QAR") != "QAR" or price <= 0:
+        return None
+    name = " ".join(str(p.get("name", "")).split())
+    image = p.get("image")
+    if isinstance(image, list):
+        image = image[0] if image else None
+    size = SIZE_RE.search(name)
+    return {
+        "store_id": chain,
+        "source": "rafeeq",
+        "source_sku": sku,
+        "name": name,
+        "size": size.group(1) if size else None,
+        "category": info["category"],
+        "price_qar": round(price, 2),
+        "in_stock": "InStock" in str(offer.get("availability", "InStock")),
+        "image_url": image,
+        "source_url": info["url"],
+        "scraped_at": now,
+    }
 
 
 # ── 3. upload ───────────────────────────────────────────────────────────────
@@ -298,6 +339,8 @@ def main() -> None:
     s.add_argument("--limit", type=int, default=0, help="max products per chain (0 = all)")
     s.add_argument("--chains", default="", help="comma-separated chain ids (default: all found)")
     s.add_argument("--append", action="store_true", help="add to the existing output file instead of replacing it")
+    s.add_argument("--slice", default="", help="K/N: only the K-th of N slices (staples are in the first slices)")
+    s.add_argument("--max-minutes", type=float, default=0, help="stop visiting pages after this long (0 = no limit)")
     sub.add_parser("upload")
     args = ap.parse_args()
     try:

@@ -1,29 +1,40 @@
 # Collects grocery prices from Rafeeq and saves them to Supabase.
-# Run it by hand from the Actions tab (a schedule gets added once we pick a refresh plan).
 # Rules: see docs/scraping-notes.md — public pages only, 1 req/s, stop if blocked.
+#
+# The ~130k grocery products are split into 16 slices (staples like milk & bread first),
+# each about 4.5 hours of polite scraping (GitHub allows 6 h per job).
+#   - Every night: one slice, rotating by date → every price refreshed about every 16 days.
+#   - "full" (run by hand): all 16 slices one after another (~3 days) for the first big load.
+#   - "sample" (run by hand): a few products per chain, for testing.
 name: Scrape prices
 
 on:
+  schedule:
+    - cron: "0 21 * * *" # every night at 00:00 Doha time
   workflow_dispatch:
     inputs:
+      mode:
+        description: "sample, daily (one slice) or full (all 16 slices, ~3 days)"
+        default: "sample"
       limit:
-        description: "Max products per chain (0 = everything)"
+        description: "Products per chain in sample mode"
         default: "30"
-      chains:
-        description: "Comma-separated chains (blank = all)"
-        default: ""
 
 permissions:
   contents: read
 
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+env:
+  SLICES: "16"
+
 jobs:
-  rafeeq:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 345 # GitHub's limit is 6 hours
-    env:
-      SUPABASE_URL: https://tayeprbksqdopengwbfh.supabase.co # public, not a secret
-      LIMIT: ${{ inputs.limit }}
-      CHAINS: ${{ inputs.chains }}
+    outputs:
+      slices: ${{ steps.plan.outputs.slices }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,8 +42,53 @@ jobs:
           python-version: "3.12"
       - name: Find product pages
         run: python scrapers/rafeeq.py index
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rafeeq-index
+          path: scrapers/data/rafeeq_index.json
+          retention-days: 7
+      - name: Decide which slices to run
+        id: plan
+        env:
+          MODE: ${{ inputs.mode || 'daily' }}
+        run: |
+          case "$MODE" in
+            sample) slices='["sample"]' ;;
+            full)   slices=$(python3 -c "import json; print(json.dumps([f'{k}/$SLICES' for k in range($SLICES)]))") ;;
+            *)      k=$(( 10#$(date -u +%j) % SLICES )); slices="[\"$k/$SLICES\"]" ;;
+          esac
+          echo "Running: $slices"
+          echo "slices=$slices" >> "$GITHUB_OUTPUT"
+
+  scrape:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350 # GitHub's limit is 6 hours; the scraper stops itself at 320 minutes
+    strategy:
+      max-parallel: 1 # one at a time, so Rafeeq only ever sees ~1 request per second from us
+      fail-fast: false
+      matrix:
+        slice: ${{ fromJSON(needs.plan.outputs.slices) }}
+    env:
+      SUPABASE_URL: https://tayeprbksqdopengwbfh.supabase.co # public, not a secret
+      SLICE: ${{ matrix.slice }}
+      LIMIT: ${{ inputs.limit || '30' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: rafeeq-index
+          path: scrapers/data
       - name: Read prices
-        run: python scrapers/rafeeq.py scrape --limit "$LIMIT" --chains "$CHAINS"
+        run: |
+          if [ "$SLICE" = "sample" ]; then
+            python scrapers/rafeeq.py scrape --limit "$LIMIT"
+          else
+            python scrapers/rafeeq.py scrape --slice "$SLICE" --max-minutes 320
+          fi
       - name: Save to Supabase
         run: python scrapers/rafeeq.py upload
         env:

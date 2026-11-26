@@ -106,11 +106,44 @@ export function buildReceipts(
 }
 
 /**
- * Cheapest first. A store that's missing items ranks after stores that have
- * everything, so a short receipt can't look "cheapest" just by leaving things out.
+ * Order: stores that have everything (cheapest first), then the rest
+ * (fewest missing first, then cheapest).
  */
 export function sortReceipts(receipts: Receipt[]): Receipt[] {
-  return [...receipts].sort((a, b) => a.missing - b.missing || a.total - b.total);
+  return [...receipts].sort((a, b) => {
+    const aFull = a.missing === 0 ? 0 : 1;
+    const bFull = b.missing === 0 ? 0 : 1;
+    return aFull - bFull || a.missing - b.missing || a.total - b.total;
+  });
+}
+
+/**
+ * The store to crown "Cheapest": only a store that found EVERY item can win,
+ * because totals with missing items aren't comparable. Null if none qualifies.
+ */
+export function cheapestComplete(receipts: Receipt[]): Receipt | null {
+  const complete = receipts.filter((r) => r.missing === 0);
+  if (complete.length < 1 || receipts.length < 2) return null;
+  return complete.reduce((best, r) => (r.total < best.total ? r : best));
+}
+
+/**
+ * For each list item: the lowest line total across stores, and how many stores have it.
+ * Used to mark the cheapest price on each row (only meaningful when 2+ stores have it).
+ */
+export function cheapestPerItem(receipts: Receipt[]): Map<string, { min: number; count: number }> {
+  const best = new Map<string, { min: number; count: number }>();
+  for (const r of receipts) {
+    for (const l of r.lines) {
+      if (l.lineTotal === null) continue;
+      const cur = best.get(l.itemId);
+      best.set(l.itemId, {
+        min: cur === undefined ? l.lineTotal : Math.min(cur.min, l.lineTotal),
+        count: (cur?.count ?? 0) + 1,
+      });
+    }
+  }
+  return best;
 }
 
 export function formatQar(n: number): string {
