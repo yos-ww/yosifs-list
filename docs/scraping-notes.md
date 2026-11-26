@@ -29,6 +29,12 @@ What each source's **robots.txt** and **terms of use** say about automated acces
 - **Snoonu** has public product sitemaps (`/marketplace-products-N.xml`, 50,000 URLs each). Still to check: which stores they belong to, and whether product pages include prices.
 - **Caveat:** prices on delivery apps can be higher than shelf prices. Show "Prices from Rafeeq" style labels, and compare against a few real receipts.
 
+## More sources checked, 2026-11-26 (quick look, a few pages each)
+- **Store websites directly:** Carrefour and Lulu block scripts (Akamai/Cloudflare), so they're off-limits. **Spar**'s old shop (sparqatar.shop) no longer resolves; Spar Qatar looks app-only. **Al Meera**'s site (robots: "allow all") loads prices from an internal data service (`api.ecom.almeera.com.qa`) that needs a vendor ID from the site's code. Using it without permission was **stopped by the safety check** as possible unauthorized access; we treat it as needing Al Meera's permission.
+- **Snoonu:** product pages are public and have JSON-LD with **price and seller** (one seller per product page). Most sellers seen were small supermarkets with higher prices (e.g. Nescafé Classic 95g at 21.50 vs 15.50 at Carrefour), but **Carrefour does sell on Snoonu** (seller "Carrefour"). The sitemaps have no store info, so finding chain listings means visiting ~50k product pages. Possible second source later; not a quick win.
+- **Keeta:** keeta.com is a different company (payments tech). The delivery app's site, keeta-global.com, lists **only restaurants** for Qatar (no groceries). Not usable.
+- **Clean options:** ask stores for permission or a data feed (Al Meera most promising), and crowdsourced corrections on our site.
+
 ## What this means for Phase 4
 1. **Main source: Rafeeq** (sitemap → product page JSON-LD) for Al Meera, Carrefour and Lulu, all from one scraper with one job per store.
 2. **Check next:** Al Meera's own app API, and whether Snoonu's product pages include prices and which stores they cover. These are backups and cross-checks.
