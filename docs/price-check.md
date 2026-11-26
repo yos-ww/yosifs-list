@@ -34,6 +34,20 @@ Check each on **Talabat** (that chain's page) and the **chain's own website/app*
 
 Note: Heinz French Dressing is 15.00 at Carrefour but 23.50–24.00 elsewhere on Rafeeq. Worth checking whether that's a real promotion or a data error.
 
+### Round 2 results (checked by the owner, 26 Nov 2026)
+
+| Chain | Checked against | Result |
+|---|---|---|
+| Al Meera | Al Meera website | Kikkoman ✅, Red Bull ✅, Heinz ✅, Lotus rice ✅. Nescafé Classic 47.5g **not on site**. |
+| Carrefour | Carrefour website | Kikkoman ✅, Red Bull ✅, SIS brown sugar ✅. **Heinz French Dressing: site 24.00 vs Rafeeq 15.00** (likely a stale promo). Tabasco 150ml **not sold** (only 60ml). |
+| Lulu | Lulu website | Lotus rice ✅, SIS brown sugar ✅. **QFM flour: site 9.00 vs Rafeeq 8.50.** Al Kabeer fries 1kg **not on site** (only 2.5kg). Al Alali tomato paste 220g **not on site**. |
+| Spar | owner's check | Nescafé ✅, Abu Bint rice ✅, QFM flour ✅. Al Kabeer fries 1kg and Ola oil **not available**. |
+| Monoprix | Talabat (no Monoprix website) | Kikkoman: Talabat 16.75 vs Rafeeq 13.00. SIS brown sugar: Talabat 14.25 vs Rafeeq 13.25. Lotus rice: Talabat promo 17.00 (was 27.50) vs Rafeeq 24.00. Inconclusive: Talabat adds its own markup. |
+
+**Overall (rounds 1 + 2, vs stores' own websites): 17 of 19 prices exact (~89%).** Misses: one stale-looking promo (Heinz at Carrefour) and one small difference (QFM at Lulu, 0.50).
+**Weak spot: availability.** About 1 in 4 items Rafeeq showed as in stock weren't on the store's website. Store sites may not list everything on the shelf, but stale listings are real. Mitigation: "Not in store?" / "Fix this price" buttons (Phase 6), plus hiding listings not re-confirmed recently.
+**Monoprix:** unverified (no website); needs a shelf check.
+
 ---
 
 ## Round 1: Carrefour only
