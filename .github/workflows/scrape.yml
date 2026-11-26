@@ -1,0 +1,39 @@
+# Collects grocery prices from Rafeeq and saves them to Supabase.
+# Run it by hand from the Actions tab (a schedule gets added once we pick a refresh plan).
+# Rules: see docs/scraping-notes.md — public pages only, 1 req/s, stop if blocked.
+name: Scrape prices
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max products per chain (0 = everything)"
+        default: "30"
+      chains:
+        description: "Comma-separated chains (blank = all)"
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  rafeeq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345 # GitHub's limit is 6 hours
+    env:
+      SUPABASE_URL: https://tayeprbksqdopengwbfh.supabase.co # public, not a secret
+      LIMIT: ${{ inputs.limit }}
+      CHAINS: ${{ inputs.chains }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Find product pages
+        run: python scrapers/rafeeq.py index
+      - name: Read prices
+        run: python scrapers/rafeeq.py scrape --limit "$LIMIT" --chains "$CHAINS"
+      - name: Save to Supabase
+        run: python scrapers/rafeeq.py upload
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}

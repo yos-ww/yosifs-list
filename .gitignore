@@ -43,3 +43,6 @@ next-env.d.ts
 # python (scrapers)
 __pycache__/
 .venv/
+
+# scraper output (large, regenerated weekly)
+scrapers/data/
