@@ -278,10 +278,11 @@ function Line({
 
   return (
     <li data-alt-root className="group relative">
-      <div className="flex items-center gap-1.5 py-1 text-[13px]">
+      {/* Every row is the same height (room for 2 lines of name) so totals line up across receipts. */}
+      <div className="flex h-11 items-center gap-1.5 text-[13px]">
         <span
           title={label}
-          className={`min-w-0 flex-1 truncate ${line.product ? "text-neutral-300" : "text-neutral-600"}`}
+          className={`line-clamp-2 min-w-0 flex-1 leading-[1.3] ${line.product ? "text-neutral-300" : "text-neutral-600"}`}
         >
           {line.qty > 1 && <span className="mr-1 text-neutral-500">{line.qty}×</span>}
           {label}
@@ -335,7 +336,7 @@ function Line({
               className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-xs transition-colors hover:bg-neutral-800"
             >
               <ProductThumb src={alt.image} className="size-7" />
-              <span className="min-w-0 flex-1 truncate text-neutral-300">
+              <span className="min-w-0 flex-1 leading-snug text-neutral-300">
                 {withSize(alt.name, alt.size)}
               </span>
               <span className="shrink-0 font-mono tabular-nums text-neutral-400">{formatQar(alt.price)}</span>
