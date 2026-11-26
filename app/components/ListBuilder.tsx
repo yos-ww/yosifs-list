@@ -14,6 +14,24 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
+/** Tiny square product photo. Missing or broken photos show a plain empty square, never an icon. */
+function ProductThumb({ src }: { src?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
+    return <span aria-hidden className="size-9 shrink-0 rounded-sm border border-neutral-800" />;
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- tiny remote store photos; no optimisation needed
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="size-9 shrink-0 rounded-sm bg-white object-cover"
+    />
+  );
+}
+
 export default function ListBuilder() {
   const items = useListItems();
   const [text, setText] = useState("");
@@ -64,7 +82,11 @@ export default function ListBuilder() {
 
   return (
     <div className="flex w-full flex-col items-center">
-      <form onSubmit={addItem} className="flex w-full max-w-md items-center gap-3">
+      {/* Wide rounded "card" search box with a soft glow, like Claude's / ChatGPT's message box. */}
+      <form
+        onSubmit={addItem}
+        className="flex w-full max-w-2xl items-center gap-2 rounded-3xl border border-neutral-800 bg-neutral-900/80 py-2 pl-5 pr-2 shadow-[0_0_40px_rgba(255,255,255,0.05)] transition-colors focus-within:border-neutral-600"
+      >
         <input
           ref={inputRef}
           value={text}
@@ -74,13 +96,13 @@ export default function ListBuilder() {
           autoFocus
           autoComplete="off"
           enterKeyHint="enter"
-          className="min-w-0 flex-1 border-b border-neutral-700 bg-transparent py-2 text-base text-neutral-100 placeholder:text-neutral-600 focus:border-neutral-300 focus:outline-none"
+          className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-neutral-100 placeholder:text-neutral-500 focus:outline-none"
         />
         <button
           type="button"
           onClick={() => router.push("/results")}
           disabled={items.length === 0}
-          className="rounded-full border border-neutral-700 px-4 py-1.5 text-sm text-neutral-200 transition-colors hover:border-neutral-300 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+          className="shrink-0 rounded-full bg-neutral-100 px-5 py-2.5 text-sm font-medium text-black transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:hover:opacity-100"
         >
           Search
         </button>
@@ -98,17 +120,7 @@ export default function ListBuilder() {
                     removing.has(item.id) ? "animate-item-out" : "animate-item-in"
                   }`}
                 >
-                  {item.product ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- tiny remote store photos; no optimisation needed
-                    <img
-                      src={item.product.image}
-                      alt=""
-                      loading="lazy"
-                      className="size-9 shrink-0 rounded-sm bg-white object-cover"
-                    />
-                  ) : (
-                    <span aria-hidden className="size-9 shrink-0 rounded-sm border border-neutral-800" />
-                  )}
+                  <ProductThumb src={item.product?.image} />
                   <span className="min-w-0 flex-1 truncate text-sm text-neutral-200">
                     {item.qty > 1 && <span className="mr-1.5 text-neutral-500">{item.qty}×</span>}
                     {item.product ? item.product.name : item.query}
