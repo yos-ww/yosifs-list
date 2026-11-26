@@ -154,11 +154,7 @@ export default function Receipts() {
             </p>
           ) : (
             <p>No store has everything on your list yet, so the totals cover different items.</p>
-          )}
-          <p className="mt-1.5 text-xs text-neutral-600">
-            <span className="text-neutral-300">•</span> marks the cheapest price for each item.
-          </p>
-        </div>
+          )}        </div>
       )}
 
       {/* Big, hard-to-miss accuracy warning that asks people to report problems. */}
@@ -201,17 +197,6 @@ export default function Receipts() {
       {receipts.length > 1 && (
         <p className="mt-3 text-xs text-neutral-600 sm:hidden">Swipe to compare stores →</p>
       )}
-
-      <p className="mt-12 max-w-md text-center text-xs text-neutral-500">
-        Prices may differ slightly in store. Spot something off?{" "}
-        <button
-          type="button"
-          onClick={() => setReportOpen(true)}
-          className="text-neutral-300 underline underline-offset-4 hover:text-white"
-        >
-          Tap to report it.
-        </button>
-      </p>
 
       {reportOpen && <ReportDialog receipts={receipts} onClose={closeReport} />}    </div>
   );
