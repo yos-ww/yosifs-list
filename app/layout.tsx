@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import CreatorLinks from "./components/CreatorLinks";
 
 // Body text: clean and modern.
 const geistSans = Geist({
@@ -33,7 +34,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="relative min-h-full flex flex-col">
+        <CreatorLinks />
+        {children}
+      </body>
     </html>
   );
 }

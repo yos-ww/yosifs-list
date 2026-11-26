@@ -14,7 +14,7 @@ _Update this line whenever a phase starts or finishes._
 
 ## Hard rules from the vision (don't break these)
 - **Design:** minimal and black, with *Yosif's List* in a classy italic serif at the top. Products show real store photos, never icons.
-- **No money:** no ads, subscriptions, affiliate links or tracking. Budget is about $10–20 a month at most, so use free tiers and **ask the owner before adding anything paid.**
+- **No money:** no ads, subscriptions, affiliate links or tracking. Budget is about $10–20 a month at most, so use free tiers and **ask the owner before adding anything paid.** The owner's own "by Yosif" GitHub/LinkedIn credit (top right, `lib/site.ts`) is wanted and is not an ad.
 - **Scope:** Doha only, English only (Arabic later). Stores: Carrefour, Lulu, Al Meera first.
 - **Searches never scrape live.** They read saved prices from the database.
 - **Scrapers are plain scripts, never AI.** One small scraper per store, gentle request rates, run on a schedule by GitHub Actions.
