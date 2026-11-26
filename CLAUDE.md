@@ -8,7 +8,7 @@ A free website for **Doha, Qatar**. The user types a grocery list and sees which
 
 ## Current phase
 **Phase 2: Results receipts UI (mock data).** Built, waiting for the owner to review. Phase 1 (list builder) was approved.
-Mock prices come from `lib/mockStores.ts`. The UI only depends on the types in `lib/results.ts`, so Phase 3 should return that same shape from the database. Phase 0 is almost done: the GitHub repo `yos-ww/yosifs-list` exists. Waiting on: the owner importing it into **Vercel** so each push to `main` auto-deploys.
+Mock prices come from `lib/mockStores.ts`. The UI only depends on the types in `lib/results.ts`, so Phase 3 should return that same shape from the database. Live site: **https://yosifs-list.vercel.app/**. Vercel auto-deploys every push to `main` of `yos-ww/yosifs-list`.
 Sample products with real photos are in `lib/mockProducts.ts` (from Open Food Facts) until Phase 3 adds the database.
 _Update this line whenever a phase starts or finishes._
 

@@ -6,7 +6,7 @@ Build order for Yosif's List. Each phase ends with something the owner can see a
 
 | # | Phase | Done when |
 |---|-------|-----------|
-| 0 | **Setup**: git, Next.js scaffold, public GitHub repo, Vercel deploy | A black page saying *Yosif's List* is live on a `*.vercel.app` URL |
+| 0 | **Setup**: git, Next.js scaffold, public GitHub repo, Vercel deploy | A black page saying *Yosif's List* is live on a `*.vercel.app` URL ✅ [yosifs-list.vercel.app](https://yosifs-list.vercel.app/) |
 | 1 | **List builder UI** (mock data): italic title, Enter adds an item with an animation, columns of 12, photo + name + ✕, `localStorage` autosave, optional `2x milk` quantities | The owner can build, remove and refresh a list on desktop and phone |
 | 2 | **Results receipts UI** (mock data): one receipt per store, sorted cheapest first, cheapest highlighted, "not found" rows, alternatives arrow, swipe on phones, disclaimer footer | The full list-to-results journey works with fake data |
 | 3 | **Database + search**: Supabase schema, `pg_trgm` fuzzy search, `/api/search`, seed data | "milk", "eggs" and "rice" return sensible matches from the DB |
