@@ -14,6 +14,7 @@ Build order for Yosif's List. Each phase ends with something the owner can see a
 | 5 | **Accounts + saved lists**: username/password (hidden made-up email in Supabase Auth), past lists, `last_login`, yearly inactive cleanup | Sign up, save, log out and in, and reload an old list all work |
 | 6 | **"Fix this price"**: correction form, owner approval on `/admin`, rate limiting | A correction can be submitted, approved and shown |
 | 7 | **Launch polish**: phone testing, loading/empty/error states, favicon, optional domain, "How it works" page | Ready to share |
+| — | **After launch (once there are real visitor numbers)**: email the chains (Al Meera first) for permission or a data feed; offer **Snoonu Mart** and **Talabat Mart** a place in the comparison (as neutral extra stores, never promoted) in exchange for permission to use their data | Owner sends the emails; Claude drafts them |
 | — | **Later**: more stores, AI product matching, AI scraper repair, smarter search, Arabic | Only if needed |
 
 ## Planned layout
