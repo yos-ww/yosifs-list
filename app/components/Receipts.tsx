@@ -190,9 +190,7 @@ export default function Receipts() {
       </p>
       {fixNote && (
         <p className="mt-2 text-xs text-neutral-600">Price corrections are coming soon. Thanks for helping!</p>
-      )}
-      <p className="mt-2 text-[11px] text-neutral-700">Prices collected from the Rafeeq delivery app.</p>
-    </div>
+      )}    </div>
   );
 }
 
@@ -287,16 +285,23 @@ function Line({
           {label}
         </span>
         {line.alternatives.length > 0 && (
+          // Always visible so people know they can pick another option.
           <button
             type="button"
             onClick={() => onToggle(menuKey)}
             aria-expanded={isOpen}
-            aria-label={`Alternatives for ${line.query}`}
-            className={`shrink-0 px-1 text-xs text-neutral-500 transition hover:text-neutral-100 focus-visible:opacity-100 ${
-              isOpen ? "rotate-180 opacity-100" : "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"
+            aria-label={`See ${line.alternatives.length} other option${line.alternatives.length === 1 ? "" : "s"} for ${line.query}`}
+            title="See other options"
+            className={`flex shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-px text-[10px] transition-colors ${
+              isOpen
+                ? "border-neutral-500 text-neutral-100"
+                : "border-neutral-800 text-neutral-500 hover:border-neutral-600 hover:text-neutral-200"
             }`}
           >
-            ⌄
+            {line.alternatives.length} more
+            <span aria-hidden className={`inline-block transition-transform ${isOpen ? "rotate-180" : ""}`}>
+              ⌄
+            </span>
           </button>
         )}
         <span
