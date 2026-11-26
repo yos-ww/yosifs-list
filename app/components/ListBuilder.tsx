@@ -82,12 +82,13 @@ export default function ListBuilder() {
           className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-neutral-100 placeholder:text-neutral-500 focus:outline-none"
         />
         <button
-          type="button"
-          onClick={() => router.push("/results")}
-          disabled={items.length === 0}
-          className="shrink-0 rounded-full bg-neutral-400 px-5 py-2.5 text-sm font-medium text-neutral-950 transition-colors hover:bg-neutral-300 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          type="submit"
+          // Keep focus (and the phone keyboard) in the input after tapping Add.
+          onPointerDown={(e) => e.preventDefault()}
+          disabled={!text.trim()}
+          className="shrink-0 rounded-full bg-neutral-400 px-5 py-2.5 text-sm font-medium text-neutral-950 transition-colors hover:bg-neutral-300 disabled:cursor-default disabled:bg-neutral-800 disabled:text-neutral-500"
         >
-          Search
+          Add
         </button>
       </form>
 
@@ -127,13 +128,28 @@ export default function ListBuilder() {
       )}
 
       {items.length > 0 && (
-        <button
-          type="button"
-          onClick={() => setListItems([])}
-          className="mt-8 text-xs text-neutral-600 transition-colors hover:text-neutral-300"
-        >
-          Clear list
-        </button>
+        <>
+          {/* Separate from Add so it's clear this searches the whole list. Stays in view on long lists. */}
+          <div className="sticky bottom-4 z-10 mt-10">
+            <button
+              type="button"
+              onClick={() => router.push("/results")}
+              className="rounded-full border border-neutral-700 bg-neutral-900/90 px-7 py-3 text-sm font-medium text-neutral-100 shadow-[0_0_40px_rgba(255,255,255,0.06)] backdrop-blur transition-colors hover:border-neutral-500 hover:bg-neutral-800"
+            >
+              Compare prices
+              <span className="ml-2 text-neutral-500">
+                {items.length} item{items.length === 1 ? "" : "s"} →
+              </span>
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setListItems([])}
+            className="mt-6 text-xs text-neutral-600 transition-colors hover:text-neutral-300"
+          >
+            Clear list
+          </button>
+        </>
       )}
     </div>
   );
