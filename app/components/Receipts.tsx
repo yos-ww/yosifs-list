@@ -166,12 +166,9 @@ export default function Receipts() {
         role="note"
         className="mb-8 w-full max-w-2xl rounded-2xl border border-amber-400/40 bg-amber-400/[0.07] px-5 py-4 text-left"
       >
-        <p className="text-sm font-semibold text-amber-200">⚠ Please double-check before you shop</p>
-        <p className="mt-1.5 text-sm leading-relaxed text-amber-100/75">
-          Prices come from online listings, so <span className="text-amber-100">some may be out of date</span>{" "}
-          and <span className="text-amber-100">some items may not be available</span> at your store. If anything
-          looks wrong, <span className="text-amber-100">please report it</span>, even small things. Every report
-          makes Yosif&apos;s List more accurate for everyone.
+        <p className="text-sm font-semibold text-amber-200">⚠ Prices may be out of date</p>
+        <p className="mt-1 text-sm text-amber-100/75">
+          Some items may not be in stock. Spot a mistake? Please report it.
         </p>
         <button
           type="button"
