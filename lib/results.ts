@@ -20,6 +20,8 @@ export type Match = {
   source_url: string | null;
   score: number;
   rank: number; // 1 = best match at that store
+  /** True = a real match for the item; false = only an alternative of the same kind. */
+  is_main?: boolean;
 };
 
 export type PricedProduct = {
@@ -30,6 +32,8 @@ export type PricedProduct = {
   /** Price for one, in QAR. */
   price: number;
   sourceUrl?: string;
+  /** False when this is only a same-kind alternative (never chosen automatically). */
+  isMain: boolean;
 };
 
 export type ReceiptLine = {
@@ -61,6 +65,7 @@ function toPriced(m: Match): PricedProduct {
     image: m.image_url ?? "",
     price: Number(m.price_qar),
     sourceUrl: m.source_url ?? undefined,
+    isMain: m.is_main !== false,
   };
 }
 
@@ -89,7 +94,9 @@ export function buildReceipts(
         .sort((a, b) => a.rank - b.rank)
         .map(toPriced);
       const picked = choices[`${store.id}:${item.id}`];
-      const product = options.find((o) => o.id === picked) ?? options[0] ?? null;
+      // The user's pick wins; otherwise only a real match counts. Same-kind alternatives are
+      // offered but never chosen automatically, so the store comparison stays like-for-like.
+      const product = options.find((o) => o.id === picked) ?? options.find((o) => o.isMain) ?? null;
       return {
         itemId: item.id,
         query: item.query,

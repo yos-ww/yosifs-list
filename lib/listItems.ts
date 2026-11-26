@@ -9,6 +9,11 @@ export type ListItem = {
   qty: number;
   /** The product we show a photo and name for, or null if nothing matched (yet). */
   product: { id: string; name: string; size: string; image: string } | null;
+  /**
+   * Only for products picked from the dropdown: their aisle (e.g. "rice"). The results then
+   * match that exact product, and offer other products of this kind as alternatives.
+   */
+  kind?: string;
 };
 
 const MAX_QTY = 99;
@@ -39,6 +44,8 @@ export type Suggestion = {
   min_price: number | string;
   max_price: number | string;
   store_count: number;
+  /** The product's aisle, e.g. "rice" (used to find alternatives on the results page). */
+  kind?: string | null;
 };
 
 export function suggestProducts(q: string, signal?: AbortSignal): Promise<Suggestion[]> {

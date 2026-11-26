@@ -64,7 +64,7 @@ export default function ListBuilder() {
   const visible = menuOpen && typed.length >= 2 && suggest?.q === typed ? suggest.rows : [];
 
   /** Add to the list (or bump the quantity if it's already there). */
-  function addToList(query: string, qty: number, product: ListItem["product"]) {
+  function addToList(query: string, qty: number, product: ListItem["product"], kind?: string) {
     setText("");
     setMenuOpen(false);
     setActive(-1);
@@ -77,7 +77,7 @@ export default function ListBuilder() {
       );
       return;
     }
-    const item: ListItem = { id: newId(), query, qty, product };
+    const item: ListItem = { id: newId(), query, qty, product, ...(kind ? { kind } : {}) };
     setListItems([...items, item]);
     if (!product) {
       // Typed without picking: show it right away, fill in a photo once the database answers.
@@ -90,7 +90,9 @@ export default function ListBuilder() {
   /** Picked from the dropdown: the list gets that exact product, and results compare it across stores. */
   function pick(s: Suggestion) {
     const { qty } = parseEntry(text);
-    addToList(s.name, qty, { id: s.name, name: s.name, size: s.size ?? "", image: s.image_url ?? "" });
+    // Remember the aisle (e.g. "rice") so the results can offer other rices as alternatives.
+    const kind = s.kind && s.kind !== "all" ? s.kind : undefined;
+    addToList(s.name, qty, { id: s.name, name: s.name, size: s.size ?? "", image: s.image_url ?? "" }, kind);
   }
 
   function onSubmit(e: FormEvent) {

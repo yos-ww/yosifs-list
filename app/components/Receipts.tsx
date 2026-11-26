@@ -32,17 +32,19 @@ export default function Receipts() {
   const [failed, setFailed] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
-  // Only search again when what was typed changes (not when a quantity changes).
-  const queriesKey = JSON.stringify(items.map((i) => i.query));
+  // Only search again when the items themselves change (not when a quantity changes).
+  const queriesKey = JSON.stringify(items.map((i) => [i.query, i.kind ?? null]));
 
   useEffect(() => {
     if (!hydrated) return;
-    const queries = JSON.parse(queriesKey) as string[];
-    if (queries.length === 0) return;
+    const parsed = JSON.parse(queriesKey) as [string, string | null][];
+    if (parsed.length === 0) return;
+    const queries = parsed.map(([q]) => q);
+    const kinds = parsed.map(([, k]) => k);
     const ctrl = new AbortController();
     Promise.all([
       select<Store>("stores", "id,name", ctrl.signal),
-      rpc<Match[]>("search_list", { queries, per_store: 4 }, ctrl.signal),
+      rpc<Match[]>("search_list", { queries, per_store: 5, kinds }, ctrl.signal),
     ])
       .then(([stores, matches]) => setData({ key: queriesKey, stores, matches }))
       .catch(() => {
