@@ -7,8 +7,11 @@ A free website for **Doha, Qatar**. The user types a grocery list and sees which
 - Next.js 16 rules: `AGENTS.md`. **Read the bundled docs in `node_modules/next/dist/docs/` before using a Next.js API**, because they have changed from older versions.
 
 ## Current phase
-**Phase 2: Results receipts UI (mock data).** Built, waiting for the owner to review. Phase 1 (list builder) was approved.
-Mock prices come from `lib/mockStores.ts`. The UI only depends on the types in `lib/results.ts`, so Phase 3 should return that same shape from the database. Live site: **https://yosifs-list.vercel.app/**. Vercel auto-deploys every push to `main` of `yos-ww/yosifs-list`.
+**Phase 3 (database) is live, and Phase 4 (scrapers) has started.** The site reads real prices from Supabase. The Rafeeq scraper (`scrapers/rafeeq.py`, GitHub Action "Scrape prices", run by hand) has loaded a 30-per-chain sample for 7 chains.
+Open questions: the refresh plan for ~175k grocery products, and better matching for vague queries like "milk".
+- **Database changes:** add or edit SQL in `supabase/migrations/` and push. The "Update database" Action re-runs **every** file in order with psql, so every migration must be safe to re-run (`if not exists`, `create or replace`, `drop policy if exists`). Never ask the owner to paste SQL.
+- **Secrets (GitHub Actions):** `SUPABASE_SECRET_KEY` (scraper writes), `SUPABASE_DB_URL` (migrations). The publishable key and URL are public and live in `lib/supabase.ts`.
+- The browser talks to Supabase directly (`lib/supabase.ts`). Search is the `search_list(queries[], per_store)` database function; `lib/results.ts` builds the receipts. Live site: **https://yosifs-list.vercel.app/**. Vercel auto-deploys every push to `main` of `yos-ww/yosifs-list`.
 Sample products with real photos are in `lib/mockProducts.ts` (from Open Food Facts) until Phase 3 adds the database.
 _Update this line whenever a phase starts or finishes._
 
