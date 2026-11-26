@@ -62,7 +62,23 @@ Rafeeq prices collected **26 Nov 2026**. Compare each one with **Talabat**, the 
 | Abu Bint Calrose Rice 5kg | 36.00 | — | Not on Talabat Carrefour (only Sunwhite Calrose) |
 | Lotus Jasmine Rice 5kg | 27.00 | — | Not on Talabat Carrefour |
 
-**Takeaway:** no sign of a Rafeeq markup in the two comparable items. But Talabat is itself a delivery app with its own prices and a smaller range, so it's a weak reference. **Next:** compare against Carrefour's own website/app (the real store price) and, if possible, a shelf check.
+**Takeaway:** no sign of a Rafeeq markup in the two comparable items. But Talabat is itself a delivery app with its own prices and a smaller range, so it's a weak reference.
+
+**Carrefour's own website (checked by the owner, 26 Nov 2026), the real store price:**
+
+| Product | Rafeeq | Carrefour site | Result |
+|---|---:|---:|---|
+| Nescafé Classic 95g | 15.50 | 15.50 | ✅ Same |
+| QFM Flour No.1 2kg | 8.75 | 8.75 | ✅ Same |
+| Abu Bint Calrose Rice 5kg | 36.00 | 36.00 | ✅ Same |
+| Lotus Jasmine Rice 5kg | 27.00 | 27.00 | ✅ Same |
+| Al Alali Tomato Paste 220g | 3.50 | 3.50 | ✅ Same (Talabat: 3.75) |
+| Baladna Fresh Milk Low Fat 1L | 8.00 | — | Site only has long-life at 7.00 |
+| SIS Caster Sugar 1kg | 8.00 | — | Site has SIS Fine Grain White Sugar 1kg at 6.25 (different product) |
+| Baladna Strawberry Greek Yoghurt 360g | 8.00 | — | Site only has the 150g |
+| Ghadeer Halloumi 250g | 11.75 | — | Not on site (Baladna halloumi only) |
+
+**Verdict: Rafeeq prices match Carrefour's own prices exactly (5/5).** Rafeeq is *more* accurate than Talabat. Caveat: Rafeeq's Carrefour listing includes a few items the Carrefour site doesn't (probably a specific branch's range), so occasionally a product may not be in every branch.
 
 ## Tips
 - **Easiest:** check Talabat for whichever stores it lists (Al Meera, Carrefour and Lulu are usually there). Spot-check 3–4 items in one physical store.
