@@ -26,13 +26,6 @@ export const mockProducts: MockProduct[] = [
     "image": "https://images.openfoodfacts.org/images/products/950/110/182/1187/front_en.3.200.jpg"
   },
   {
-    "id": "2200003492842",
-    "name": "Lulu bread",
-    "size": "",
-    "category": "breads",
-    "image": "https://images.openfoodfacts.org/images/products/220/000/349/2842/front_en.4.200.jpg"
-  },
-  {
     "id": "6300900550419",
     "name": "London Bakery Hotdog Bread",
     "size": "520g",

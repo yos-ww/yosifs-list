@@ -57,3 +57,10 @@ export function setListItems(next: ListItem[]) {
 export function useListItems(): ListItem[] {
   return useSyncExternalStore(subscribe, read, () => EMPTY);
 }
+
+const noopSubscribe = () => () => {};
+
+/** False during server rendering, true once the browser has loaded the saved list. */
+export function useHydrated(): boolean {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+}

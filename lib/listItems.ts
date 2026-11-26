@@ -39,27 +39,33 @@ function words(s: string): string[] {
 }
 
 /**
- * Find the best sample product for a query (stand-in for real search in Phase 3).
+ * Rank products by how well they match a query (stand-in for real search in Phase 3).
  * Scores each product by how many query words appear in its name or category.
+ * Returns only products that match at all, best first.
  */
-export function findProduct(query: string): ListItem["product"] {
+export function rankProducts<T extends Pick<MockProduct, "name" | "category">>(
+  query: string,
+  products: T[],
+): T[] {
   const q = words(query);
-  if (q.length === 0) return null;
-  let best: MockProduct | null = null;
-  let bestScore = 0;
-  for (const p of mockProducts) {
+  if (q.length === 0) return [];
+  const scored: { p: T; score: number }[] = [];
+  for (const p of products) {
     const name = new Set(words(p.name));
     const cat = new Set(words(p.category));
     let score = 0;
     for (const w of q) {
       if (name.has(w)) score += 1;
-      else if (cat.has(w)) score += 0.75;
+      if (cat.has(w)) score += 0.75; // "milk" ranks real milks above "Milk Bread"
     }
-    if (score > bestScore) {
-      best = p;
-      bestScore = score;
-    }
+    if (score > 0) scored.push({ p, score });
   }
+  return scored.sort((a, b) => b.score - a.score).map((s) => s.p); // stable: ties keep catalogue order
+}
+
+/** Best sample product for a query, for the photo + name on the list. */
+export function findProduct(query: string): ListItem["product"] {
+  const best = rankProducts(query, mockProducts)[0];
   if (!best) return null;
   return { id: best.id, name: best.name, size: best.size, image: best.image };
 }

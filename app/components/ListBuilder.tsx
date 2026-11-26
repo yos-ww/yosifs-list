@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { findProduct, newId, parseEntry, type ListItem } from "@/lib/listItems";
 import { setListItems, useListItems } from "@/lib/listStore";
+import ProductThumb from "./ProductThumb";
 
 /** After this many items, a new column starts to the right (desktop). */
 const ITEMS_PER_COLUMN = 12;
@@ -12,24 +13,6 @@ function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
-}
-
-/** Tiny square product photo. Missing or broken photos show a plain empty square, never an icon. */
-function ProductThumb({ src }: { src?: string }) {
-  const [failed, setFailed] = useState(false);
-  if (!src || failed) {
-    return <span aria-hidden className="size-9 shrink-0 rounded-sm border border-neutral-800" />;
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element -- tiny remote store photos; no optimisation needed
-    <img
-      src={src}
-      alt=""
-      loading="lazy"
-      onError={() => setFailed(true)}
-      className="size-9 shrink-0 rounded-sm bg-white object-cover"
-    />
-  );
 }
 
 export default function ListBuilder() {
@@ -102,7 +85,7 @@ export default function ListBuilder() {
           type="button"
           onClick={() => router.push("/results")}
           disabled={items.length === 0}
-          className="shrink-0 rounded-full bg-neutral-100 px-5 py-2.5 text-sm font-medium text-black transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:hover:opacity-100"
+          className="shrink-0 rounded-full bg-neutral-400 px-5 py-2.5 text-sm font-medium text-neutral-950 transition-colors hover:bg-neutral-300 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
         >
           Search
         </button>

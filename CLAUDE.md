@@ -7,7 +7,8 @@ A free website for **Doha, Qatar**. The user types a grocery list and sees which
 - Next.js 16 rules: `AGENTS.md`. **Read the bundled docs in `node_modules/next/dist/docs/` before using a Next.js API**, because they have changed from older versions.
 
 ## Current phase
-**Phase 1: List builder UI (mock data).** Built, waiting for the owner to review the look. Phase 0 is almost done: the GitHub repo `yos-ww/yosifs-list` exists. Waiting on: the owner importing it into **Vercel** so each push to `main` auto-deploys.
+**Phase 2: Results receipts UI (mock data).** Built, waiting for the owner to review. Phase 1 (list builder) was approved.
+Mock prices come from `lib/mockStores.ts`. The UI only depends on the types in `lib/results.ts`, so Phase 3 should return that same shape from the database. Phase 0 is almost done: the GitHub repo `yos-ww/yosifs-list` exists. Waiting on: the owner importing it into **Vercel** so each push to `main` auto-deploys.
 Sample products with real photos are in `lib/mockProducts.ts` (from Open Food Facts) until Phase 3 adds the database.
 _Update this line whenever a phase starts or finishes._
 
