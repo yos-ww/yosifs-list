@@ -48,6 +48,22 @@ Rafeeq prices collected **26 Nov 2026**. Compare each one with **Talabat**, the 
 | | Carrefour | 11.75 | | |
 | | Lulu | 11.75 *(out)* | | |
 
+## Results so far
+
+**Talabat, Carrefour page (checked by the owner, 26 Nov 2026):**
+
+| Product | Rafeeq | Talabat | Result |
+|---|---:|---:|---|
+| QFM Flour No.1 2kg | 8.75 | 8.75 | Same |
+| Al Alali Tomato Paste 220g | 3.50 | 3.75 | Rafeeq 0.25 cheaper |
+| Baladna Fresh Milk Low Fat 1L | 8.00 | — | Talabat only had the UHT (long-life) version, at 7.00; different product |
+| Nescafé Classic 95g | 15.50 | — | Not on Talabat Carrefour (only Nescafé Gold 95g) |
+| SIS Caster Sugar 1kg | 8.00 | — | Not found (name may differ) |
+| Abu Bint Calrose Rice 5kg | 36.00 | — | Not on Talabat Carrefour (only Sunwhite Calrose) |
+| Lotus Jasmine Rice 5kg | 27.00 | — | Not on Talabat Carrefour |
+
+**Takeaway:** no sign of a Rafeeq markup in the two comparable items. But Talabat is itself a delivery app with its own prices and a smaller range, so it's a weak reference. **Next:** compare against Carrefour's own website/app (the real store price) and, if possible, a shelf check.
+
 ## Tips
 - **Easiest:** check Talabat for whichever stores it lists (Al Meera, Carrefour and Lulu are usually there). Spot-check 3–4 items in one physical store.
 - You don't need every row. About 10–15 comparisons across 2–3 stores is enough to see a pattern.
