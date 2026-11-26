@@ -2,11 +2,10 @@ import { creator } from "@/lib/site";
 
 const linkClass = "p-1 text-neutral-500 transition-colors hover:text-neutral-100";
 
-/** Small "by Yosif" credit with GitHub / LinkedIn logos, top-right of every page. */
+/** Small GitHub / LinkedIn logos in the top-right of every page (logos only, no "by" text). */
 export default function CreatorLinks() {
   return (
     <div className="absolute right-4 top-4 flex items-center gap-1 sm:right-6 sm:top-5">
-      <span className="mr-1 text-xs text-neutral-500">by {creator.name}</span>
       {creator.githubUrl && (
         <a
           href={creator.githubUrl}
