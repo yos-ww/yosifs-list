@@ -3,7 +3,8 @@
 --
 -- Score per product = share of query words found as whole words in the name
 --                   + 0.4 × share found in the category (e.g. "dairy eggs / milk")
---                   + 0.2 × fuzzy similarity (tie-breaker; also lets near-exact typos through).
+--                   + 0.2 × fuzzy similarity (tie-breaker).
+-- Note: the migrate workflow re-runs every file in order, so this file is the current definition.
 create or replace function public.search_list(queries text[], per_store int default 4)
 returns table (
   query_idx  int,
@@ -60,7 +61,8 @@ as $$
     ) sc
     where p.in_stock
       and q.q <% p.name                          -- quick pre-filter using the trigram index
-      and (m.in_name > 0 or m.fuzzy >= 0.8)      -- whole words, or a near-exact typo
+      and m.in_name >= 0.5                       -- at least half the typed words, as whole words
+                                                 -- (typo-tolerant "smarter search" comes later)
   ) s
   where s.rn <= least(greatest(per_store, 1), 10)
   order by q.idx, s.store_id, s.rn;
