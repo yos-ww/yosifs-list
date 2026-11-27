@@ -49,7 +49,7 @@ export type Suggestion = {
 };
 
 export function suggestProducts(q: string, signal?: AbortSignal): Promise<Suggestion[]> {
-  return rpc<Suggestion[]>("suggest_products", { q, max_results: 6 }, signal);
+  return rpc<Suggestion[]>("suggest_products", { q, max_results: 12 }, signal);
 }
 
 /** "Abu Kass Rice 5kg" + "5kg" → "Abu Kass Rice 5kg" (don't repeat a size that's already in the name). */

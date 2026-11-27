@@ -42,10 +42,25 @@ export default function ListBuilder() {
   /** Highlighted suggestion for arrow keys (-1 = none). */
   const [active, setActive] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** The search box + dropdown together; taps inside it don't close the dropdown. */
+  const comboRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  useEffect(() => () => clearTimeout(blurTimer.current), []);
+  // Close the dropdown when the user taps/clicks anywhere outside it. (Closing on the input's
+  // blur instead broke phones: touching the list blurs the input before a tap or scroll lands.)
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (!comboRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [menuOpen]);
+
+  // Keep the arrow-key highlighted suggestion visible in the scrollable list.
+  useEffect(() => {
+    if (active >= 0) document.getElementById(`suggestion-${active}`)?.scrollIntoView({ block: "nearest" });
+  }, [active]);
 
   const typed = parseEntry(text).query;
 
@@ -68,7 +83,6 @@ export default function ListBuilder() {
 
   /** Add to the list (or bump the quantity if it's already there). */
   function addToList(query: string, qty: number, product: ListItem["product"], kind?: string) {
-    clearTimeout(blurTimer.current);
     setText("");
     setMenuOpen(false);
     setActive(-1);
@@ -144,7 +158,7 @@ export default function ListBuilder() {
 
   return (
     <div className="flex w-full flex-col items-center">
-      <div className="relative w-full max-w-2xl">
+      <div ref={comboRef} className="relative w-full max-w-2xl">
         {/* Wide rounded "card" search box with a soft glow, like Claude's / ChatGPT's message box. */}
         <form
           onSubmit={onSubmit}
@@ -159,14 +173,11 @@ export default function ListBuilder() {
               setActive(-1);
             }}
             onKeyDown={onKeyDown}
-            onFocus={() => {
-              clearTimeout(blurTimer.current);
-              setMenuOpen(true);
-            }}
-            // On phones, tapping a suggestion blurs the input BEFORE the tap registers.
-            // Closing a moment later lets the tap land on the suggestion first.
-            onBlur={() => {
-              blurTimer.current = setTimeout(() => setMenuOpen(false), 250);
+            onFocus={() => setMenuOpen(true)}
+            // Keyboard users tabbing to another control: close. (Taps outside are handled above.)
+            onBlur={(e) => {
+              const next = e.relatedTarget as Node | null;
+              if (next && !comboRef.current?.contains(next)) setMenuOpen(false);
             }}
             placeholder="Add an item — e.g. milk, 2x rice"
             aria-label="Add an item to your list"
@@ -193,7 +204,13 @@ export default function ListBuilder() {
 
         {visible.length > 0 && (
           <div className="animate-item-in absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
-            <ul id="suggestions" role="listbox" aria-label="Product suggestions" className="py-1.5">
+            <ul
+              id="suggestions"
+              role="listbox"
+              aria-label="Product suggestions"
+              // Scrolls inside itself so 12 suggestions never run off the screen (dvh = room above the phone keyboard).
+              className="max-h-[50dvh] overflow-y-auto overscroll-contain py-1.5"
+            >
               {visible.map((s, i) => (
                 <li key={s.name} id={`suggestion-${i}`} role="option" aria-selected={i === active}>
                   <button

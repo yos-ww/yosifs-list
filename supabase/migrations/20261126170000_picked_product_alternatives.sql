@@ -145,7 +145,7 @@ as $$
   where hits.in_name >= 0.5
   group by lower(regexp_replace(hits.pname, '\s+', ' ', 'g'))
   order by max(hits.pscore) desc, count(distinct hits.pstore) desc, min(hits.pprice) asc
-  limit least(greatest(max_results, 1), 10);
+  limit least(greatest(max_results, 1), 20);
 $$;
 
 grant execute on function public.suggest_products(text, int) to anon, authenticated;
